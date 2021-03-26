@@ -3,7 +3,6 @@
 // Last Update 15.03.2021
 //
 // Sebastian Boettger - seb at sono dot news
-//  
 // ----------------------------------------------
 
 #include <MQTT.h>
@@ -17,15 +16,6 @@
 #include <HTTPClient.h>
 #endif
 
-// ---------------------------------------------- Command Line Tools -----------------------------------
-//
-// mosquitto_pub -t "/sion_status/powerplant/POWERPLANTCGOOMMOKEW" -m "Device POWERPLANTISOKGKMMSA registered." -h sono.community
-// mosquitto_pub -t "/sion_status/powerplant/POWERPLANTCGOOMMOKEW" -m "140" -h sono.community
-// mosquitto_pub -t "/sion_status/powerplant/POWERPLANTEMAMIGWSQC" -m "RGB1001" -h sono.community
-// 
-// esptool.py --chip esp32 --port /dev/cu.usbserial-0001 erase_flash
-//
-// broker von sono.community
 // ---------------------------------------------- ESP32 Wifi Hotspot Configuration -----------------------------------
 
 const char ssid[] = "";
@@ -43,7 +33,7 @@ int temp_monitor_count = 55555;
 #ifdef __AVR__
   #include <avr/power.h>
 #endif
-#define NEOPIXEL_PIN 33
+#define NEOPIXEL_PIN 33 // 19 beim ersten Board (33 orig)
 #define NUMPIXELS 7
 
 #ifdef __cplusplus
@@ -278,32 +268,32 @@ void updatePixelPattern() {
      // ---- all colors - white
      if (opMode == 11) {        
         uint32_t clr = pixels.Color(255, 255, 255);  
-        pixels.fill(clr, 0, 7);          
+        pixels.fill(clr, 0, NUMPIXELS);          
      }
 
      // ---- all colors - red
      if (opMode == 12) {        
         uint32_t clr = pixels.Color(255, 0, 0);  
-        pixels.fill(clr, 0, 7);          
+        pixels.fill(clr, 0, NUMPIXELS);          
      }
 
      // ---- all colors - green
      if (opMode == 13) {        
         uint32_t clr = pixels.Color(0, 255, 0);  
-        pixels.fill(clr, 0, 7);            
+        pixels.fill(clr, 0, NUMPIXELS);            
      }
 
      // ---- all colors - blue
      if (opMode == 14) {        
         uint32_t clr = pixels.Color(0, 0, 255);  
-        pixels.fill(clr, 0, 7);             
+        pixels.fill(clr, 0, NUMPIXELS);             
      }     
 
 
      // ---- all colors - default yellow
      if (opMode == 15) {        
         uint32_t clr = pixels.Color(255, 196, 0);  
-        pixels.fill(clr, 0, 7);          
+        pixels.fill(clr, 0, NUMPIXELS);          
      }
 
      // ---- all colors - cyan
@@ -315,7 +305,7 @@ void updatePixelPattern() {
      // ---- all colors - magenta
      if (opMode == 17) {        
         uint32_t clr = pixels.Color(255, 0, 255);  
-        pixels.fill(clr, 0, 7);             
+        pixels.fill(clr, 0, NUMPIXELS);             
      }     
     
      // ---- custom color set in opPattern - center / single - "95:255188000"
@@ -332,7 +322,7 @@ void updatePixelPattern() {
         int col2 = opParameter.substring(3,6).toInt();
         int col3 = opParameter.substring(6,9).toInt();      
         uint32_t clr = pixels.Color(col1, col2, col3);  
-        pixels.fill(clr, 0, 7);                         
+        pixels.fill(clr, 0, NUMPIXELS);                         
      }
 
      
@@ -419,17 +409,36 @@ void updatePixelPattern() {
         delay (500);         
      }     
 
+     // ---- single dot - blue blinking
+     if (opMode == 105) {               
+        pixels.setPixelColor(0, 0, 0, 0);     
+        pixels.show();       
+        delay (600);           
+         pixels.setPixelColor(0, 255, 196, 0);       
+        pixels.show();
+        delay (500);         
+     }    
+
+     // ---- single dot - cyan blinking
+     if (opMode == 106) {               
+        pixels.setPixelColor(0, 0, 0, 0);     
+        pixels.show();       
+        delay (600);           
+        pixels.setPixelColor(0, 0, 255, 255);            
+        pixels.show();
+        delay (500);         
+     }         
  // ---- animated - red circled
      if (opMode == 112) {       
         pixels.clear();        
-        for (int i = 1; i < 6; i = i + 1) {
+        for (int i = 1; i < (NUMPIXELS-1); i = i + 1) {
           pixels.clear();     
           pixels.setPixelColor(i, 255, 0, 0);     
           pixels.show();       
           delay (250);           
         }
         pixels.clear();  
-        pixels.setPixelColor(6, 255, 0, 0);     
+        pixels.setPixelColor((NUMPIXELS-1), 255, 0, 0);     
         pixels.show();   
         delay (150);       
      }     
@@ -437,14 +446,14 @@ void updatePixelPattern() {
  // ---- animated - green circled
      if (opMode == 113) {       
         pixels.clear();        
-        for (int i = 1; i < 6; i = i + 1) {
+        for (int i = 1; i < (NUMPIXELS-1); i = i + 1) {
           pixels.clear();     
           pixels.setPixelColor(i, 0, 255, 0);     
           pixels.show();       
           delay (250);           
         }
         pixels.clear();  
-        pixels.setPixelColor(6, 0, 255, 0);     
+        pixels.setPixelColor((NUMPIXELS-1), 0, 255, 0);     
         pixels.show();   
         delay (150);       
      }     
@@ -453,14 +462,14 @@ void updatePixelPattern() {
     // ---- animated - blue circled
      if (opMode == 114) {       
         pixels.clear();        
-        for (int i = 1; i < 6; i = i + 1) {
+        for (int i = 1; i < (NUMPIXELS-1); i = i + 1) {
           pixels.clear();     
           pixels.setPixelColor(i, 0, 0, 255);     
           pixels.show();       
           delay (250);           
         }
         pixels.clear();  
-        pixels.setPixelColor(6, 0, 0, 255);     
+        pixels.setPixelColor((NUMPIXELS-1), 0, 0, 255);     
         pixels.show();   
         delay (150);       
      }     
@@ -469,12 +478,12 @@ void updatePixelPattern() {
     // ---- animated - red circled complex pattern
      if (opMode == 122) {       
         pixels.clear();        
-        for (int i = 0; i < 6; i = i + 1) {           
+        for (int i = 0; i < (NUMPIXELS-1); i = i + 1) {           
           pixels.setPixelColor(i, 255, 0, 0);     
           pixels.show();       
           delay (300);           
         }
-        pixels.setPixelColor(6, 255, 0, 0);     
+        pixels.setPixelColor((NUMPIXELS-1), 255, 0, 0);     
         pixels.show();    
         delay (100);   
      }  
@@ -482,12 +491,12 @@ void updatePixelPattern() {
     // ---- animated - green circled complex pattern
      if (opMode == 123) {       
         pixels.clear();        
-        for (int i = 0; i < 6; i = i + 1) {           
+        for (int i = 0; i < (NUMPIXELS-1); i = i + 1) {           
           pixels.setPixelColor(i, 0, 255, 0);     
           pixels.show();       
           delay (300);           
         }
-        pixels.setPixelColor(6, 0, 255, 0);     
+        pixels.setPixelColor((NUMPIXELS-1), 0, 255, 0);     
         pixels.show();    
         delay (100);   
      }  
@@ -495,12 +504,12 @@ void updatePixelPattern() {
     // ---- animated - blue circled complex pattern
      if (opMode == 124) {       
         pixels.clear();        
-        for (int i = 0; i < 6; i = i + 1) {           
+        for (int i = 0; i < (NUMPIXELS-1); i = i + 1) {           
           pixels.setPixelColor(i, 0, 0, 255);     
           pixels.show();       
           delay (300);           
         }
-        pixels.setPixelColor(6, 0, 0, 255);     
+        pixels.setPixelColor((NUMPIXELS-1), 0, 0, 255);     
         pixels.show();    
         delay (100);   
      }  
@@ -508,16 +517,30 @@ void updatePixelPattern() {
     // ---- animated - white circled complex pattern
      if (opMode == 130) {       
         pixels.clear();        
-        for (int i = 0; i < 6; i = i + 1) {           
+        for (int i = 0; i < (NUMPIXELS-1); i = i + 1) {           
           pixels.setPixelColor(i, 255, 255, 255);     
           pixels.show();       
           delay (300);           
         }
-        pixels.setPixelColor(6, 255, 255, 255);     
+        pixels.setPixelColor((NUMPIXELS-1), 255, 255, 255);     
         pixels.show();    
         delay (100);   
      }  
 
+    // ---- animated - white driving circle
+     if (opMode == 180) {       
+        pixels.clear();        
+        for (int i = 1; i < (NUMPIXELS-1); i = i + 1) {   
+          pixels.clear();           
+          pixels.setPixelColor(i, 255, 255, 255);     
+          pixels.show();       
+          delay (200);           
+        }
+        pixels.clear();  
+        pixels.setPixelColor((NUMPIXELS-1), 255, 255, 255);     
+        pixels.show();    
+        delay (100);   
+     }  
 
     // ---- animated - red windmill
      if (opMode == 132) {       
@@ -629,6 +652,73 @@ void updatePixelPattern() {
         pixels.show();          
         delay (200);   
      }  
+
+     
+    // ---- animated - solar and grid charging
+     if (opMode == 141) {       
+        pixels.clear();        
+        pixels.setPixelColor(1, 255, 128, 0); 
+        pixels.setPixelColor(2, 255, 128, 0);         
+        pixels.setPixelColor(4, 0, 0, 255); 
+        pixels.setPixelColor(5, 0, 0, 255);         
+        pixels.show();  
+        delay (300);          
+
+        pixels.clear();        
+        pixels.setPixelColor(2, 255, 128, 0); 
+        pixels.setPixelColor(3, 255, 128, 0);         
+        pixels.setPixelColor(5, 0, 0, 255); 
+        pixels.setPixelColor(6, 0, 0, 255);       
+        pixels.show();  
+        delay (300);          
+
+        pixels.clear();        
+        pixels.setPixelColor(3, 255, 128, 0); 
+        pixels.setPixelColor(4, 255, 128, 0);         
+        pixels.setPixelColor(6, 0, 0, 255); 
+        pixels.setPixelColor(1, 0, 0, 255);       
+        pixels.show();  
+        delay (300);  
+
+        pixels.clear();        
+        pixels.setPixelColor(1, 0, 0, 255); 
+        pixels.setPixelColor(2, 0, 0, 255);       
+        pixels.setPixelColor(4, 255, 128, 0); 
+        pixels.setPixelColor(5, 255, 128, 0);         
+        pixels.show();  
+        delay (300);  
+
+        
+        pixels.clear();        
+        pixels.setPixelColor(2, 0, 0, 255); 
+        pixels.setPixelColor(3, 0, 0, 255);       
+        pixels.setPixelColor(5, 255, 128, 0); 
+        pixels.setPixelColor(6, 255, 128, 0);         
+        pixels.show();  
+        delay (300);  
+        
+        pixels.clear();        
+        pixels.setPixelColor(1, 255, 128, 0);          
+        pixels.setPixelColor(3, 0, 0, 255); 
+        pixels.setPixelColor(4, 0, 0, 255);   
+        pixels.setPixelColor(6, 255, 128, 0);        
+        pixels.show();          
+        delay (200);   
+     }  
+
+
+    // ---- phat red blink
+     if (opMode == 152) {               
+        pixels.clear();  
+        pixels.show();       
+        delay (600);           
+        pixels.setPixelColor(0, 255, 0, 0);            
+        pixels.setPixelColor(2, 255, 0, 0);
+        pixels.setPixelColor(4, 255, 0, 0);
+        pixels.setPixelColor(6, 255, 0, 0);        
+        pixels.show();
+        delay (500);         
+     }
      
      // ---- custom color set in blink opPattern - center / single - "195:255188000"
      if (opMode == 195) {    
@@ -832,5 +922,6 @@ void loop() {
   }
 
 }
+
 
 // ---------------------------------------------- end -----------------------------------
